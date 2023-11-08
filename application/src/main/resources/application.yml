@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: "Nexus ML Integrator"
+    profile: "production"
+
+endpoints:
+  get:
+    payment: "https://api.mercadopago.com/v1/payments/%d"
