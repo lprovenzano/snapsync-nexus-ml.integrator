@@ -1,0 +1,4 @@
+spring:
+  application:
+    name: "Nexus ML Integrator"
+    profile: "development"
