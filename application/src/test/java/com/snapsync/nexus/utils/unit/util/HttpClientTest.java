@@ -224,6 +224,25 @@ class HttpClientTest {
         Mockito.verifyNoInteractions(objectMapper);
     }
 
+    @Test
+    @DisplayName("Given any request, when deserialization fails, then return runtime exception.")
+    void put_error_3() throws JsonProcessingException {
+        // Arrange
+        final Map<String, List<String>> headers = allHeaders().get(0);
+        final HttpHeaders customHeaders = getCustomHeaders(headers);
+        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
+        Mockito.when(restTemplate.exchange(
+                Mockito.eq(ERROR_URI),
+                Mockito.eq(HttpMethod.PUT),
+                Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
+                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>("This is not a JSON", HttpStatus.OK));
+
+        Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenThrow(JsonProcessingException.class);
+
+        // Act & Assert
+        Assertions.assertThrows(RuntimeException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
+    }
+
     private HttpHeaders getCustomHeaders(Map<String, List<String>> customHeaders) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
