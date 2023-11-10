@@ -1,6 +1,7 @@
-package entrypoint;
+package com.snapsync.nexus.utils.unit.entrypoint;
 
 import com.snapsync.nexus.entrypoint.PingEntrypoint;
+import com.snapsync.nexus.utils.unit.util.Json;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import util.Json;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +24,6 @@ class PingEntrypointTest {
         final ResponseEntity<String> result = pingEntrypoint.execute(randomData);
 
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
-        Assertions.assertEquals("Pong!", result.getBody());
+        Assertions.assertEquals("PONG!", result.getBody());
     }
 }

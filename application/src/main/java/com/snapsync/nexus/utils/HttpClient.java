@@ -3,13 +3,10 @@ package com.snapsync.nexus.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.snapsync.nexus.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,9 +31,11 @@ public class HttpClient<T> {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.addAll(new MultiValueMapAdapter<>(customHeaders));
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        final String response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        handleError(response.getStatusCode());
+        final String bodyResponse = response.getBody();
         try {
-            return objectMapper.readValue(response, new TypeReference<T>() {
+            return objectMapper.readValue(bodyResponse, new TypeReference<T>() {
             });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -61,12 +60,27 @@ public class HttpClient<T> {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.addAll(new MultiValueMapAdapter<>(customHeaders));
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
-        final String response = restTemplate.exchange(url, method, entity, String.class).getBody();
+        final ResponseEntity<String> response = restTemplate.exchange(url, method, entity, String.class);
+        handleError(response.getStatusCode());
+        final String bodyResponse = response.getBody();
         try {
-            return objectMapper.readValue(response, new TypeReference<T>() {
+            return objectMapper.readValue(bodyResponse, new TypeReference<T>() {
             });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void handleError(HttpStatusCode httpStatusCode) {
+        if (httpStatusCode.isError()) {
+            switch (httpStatusCode) {
+                case HttpStatus.CONFLICT -> throw new ConflictException();
+                case HttpStatus.BAD_REQUEST -> throw new BadRequestException();
+                case HttpStatus.NOT_FOUND -> throw new NotFoundException();
+                case HttpStatus.INTERNAL_SERVER_ERROR -> throw new InternalServerErrorException();
+                case HttpStatus.UNAUTHORIZED -> throw new UnauthorizedException();
+                default -> throw new RuntimeException("Unexpected status code: " + httpStatusCode);
+            }
         }
     }
 }

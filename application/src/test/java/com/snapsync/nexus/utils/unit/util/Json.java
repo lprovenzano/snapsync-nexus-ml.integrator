@@ -1,4 +1,4 @@
-package util;
+package com.snapsync.nexus.utils.unit.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
