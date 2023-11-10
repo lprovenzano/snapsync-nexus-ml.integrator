@@ -243,6 +243,24 @@ class HttpClientTest {
         Assertions.assertThrows(RuntimeException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
     }
 
+    @Test
+    @DisplayName("Given any request, when error is not handled, then runtime exception.")
+    void put_error_4() {
+        // Arrange
+        final Map<String, List<String>> headers = allHeaders().get(0);
+        final HttpHeaders customHeaders = getCustomHeaders(headers);
+        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
+        Mockito.when(restTemplate.exchange(
+                Mockito.eq(ERROR_URI),
+                Mockito.eq(HttpMethod.PUT),
+                Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
+                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.BAD_GATEWAY));
+
+        // Act & Assert
+        Assertions.assertThrows(RuntimeException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
+        Mockito.verifyNoInteractions(objectMapper);
+    }
+
     private HttpHeaders getCustomHeaders(Map<String, List<String>> customHeaders) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
