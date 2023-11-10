@@ -26,11 +26,7 @@ public class HttpClient<T> {
     }
 
     public T get(String url, Map<String, List<String>> customHeaders) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.addAll(new MultiValueMapAdapter<>(customHeaders));
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        HttpEntity<String> entity = new HttpEntity<>(buildHeaders(customHeaders));
         final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         handleError(response.getStatusCode());
         final String bodyResponse = response.getBody();
@@ -55,11 +51,7 @@ public class HttpClient<T> {
     }
 
     private T executeRequestWithBody(HttpMethod method, String url, Map<String, List<String>> customHeaders, String body) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.addAll(new MultiValueMapAdapter<>(customHeaders));
-        HttpEntity<String> entity = new HttpEntity<>(body, headers);
+        HttpEntity<String> entity = new HttpEntity<>(body, buildHeaders(customHeaders));
         final ResponseEntity<String> response = restTemplate.exchange(url, method, entity, String.class);
         handleError(response.getStatusCode());
         final String bodyResponse = response.getBody();
@@ -82,5 +74,13 @@ public class HttpClient<T> {
                 default -> throw new RuntimeException("Unexpected status code: " + httpStatusCode);
             }
         }
+    }
+
+    private HttpHeaders buildHeaders(Map<String, List<String>> customHeaders) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.addAll(new MultiValueMapAdapter<>(customHeaders));
+        return headers;
     }
 }
