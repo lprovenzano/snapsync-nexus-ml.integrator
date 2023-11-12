@@ -1,16 +1,17 @@
 package com.snapsync.nexus.entity.auth;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 @Data
 @Builder(setterPrefix = "set")
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class Credential {
-    private final String grantType = "authorization_code";
+    private String grantType;
     private Long clientId;
     private String clientSecret;
     private String code;
     private String redirectUri;
+    private String refreshToken;
 }

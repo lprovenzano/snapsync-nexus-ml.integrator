@@ -14,12 +14,10 @@ import java.util.*;
 import static java.util.stream.Collectors.joining;
 
 @Component
-public class HttpClient<T> {
+public class HttpClient {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-
-    private final Map<String, List<String>> customHeaders = new HashMap<>();
 
     @Autowired
     public HttpClient(RestTemplate restTemplate, ObjectMapper objectMapper) {
@@ -27,47 +25,30 @@ public class HttpClient<T> {
         this.objectMapper = objectMapper;
     }
 
-    public T get(String url) {
-        HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
+    public String get(String url, Map<String, List<String>> customHeaders) {
+        HttpEntity<String> entity = new HttpEntity<>(buildHeaders(customHeaders));
         final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        final String bodyResponse = response.getBody();
-        try {
-            return objectMapper.readValue(bodyResponse, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return response.getBody();
     }
 
-    public T post(String url, Object body) {
-        return executeRequestWithBody(HttpMethod.POST, url, body);
+    public String post(String url, Map<String, List<String>> headers, Object body) {
+        return executeRequestWithBody(HttpMethod.POST, url, body, headers);
     }
 
-    public T put(String url, Object body) {
-        return executeRequestWithBody(HttpMethod.PUT, url, body);
+    public String put(String url, Map<String, List<String>> headers, Object body) {
+        return executeRequestWithBody(HttpMethod.PUT, url, body, headers);
     }
 
-    public T delete(String url, Object body) {
-        return executeRequestWithBody(HttpMethod.DELETE, url, body);
+    public String delete(String url, Map<String, List<String>> headers, Object body) {
+        return executeRequestWithBody(HttpMethod.DELETE, url, body, headers);
     }
 
-    public HttpClient<T> setHeader(String key, String value) {
-        this.customHeaders.put(key, List.of(value));
-        return this;
-    }
-
-    private T executeRequestWithBody(HttpMethod method, String url, Object body) {
-        final HttpHeaders headers = buildHeaders();
+    private String executeRequestWithBody(HttpMethod method, String url, Object body, Map<String, List<String>> customHeaders) {
+        final HttpHeaders headers = buildHeaders(customHeaders);
         final String stringBody = parseBodyByContentType(body, headers);
         HttpEntity<String> entity = new HttpEntity<>(stringBody, headers);
         final ResponseEntity<String> response = restTemplate.exchange(url, method, entity, String.class);
-        final String bodyResponse = response.getBody();
-        try {
-            return objectMapper.readValue(bodyResponse, new TypeReference<T>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return response.getBody();
     }
 
     private String parseBodyByContentType(Object body, HttpHeaders headers) {
@@ -89,13 +70,23 @@ public class HttpClient<T> {
         return stringBody;
     }
 
-    private HttpHeaders buildHeaders() {
+    private HttpHeaders buildHeaders(Map<String, List<String>> customHeaders) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        if (!this.customHeaders.containsKey("Content-Type")) {
+        if (!customHeaders.containsKey("Accept")) {
+            headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        }
+        if (!customHeaders.containsKey("Content-Type")) {
             headers.setContentType(MediaType.APPLICATION_JSON);
         }
-        headers.addAll(new MultiValueMapAdapter<>(this.customHeaders));
+        headers.addAll(new MultiValueMapAdapter<>(customHeaders));
         return headers;
+    }
+
+    public <T> T jsonToModel(String json, Class<T> type) {
+        try {
+            return new ObjectMapper().readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
