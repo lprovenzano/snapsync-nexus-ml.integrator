@@ -3,7 +3,7 @@ package com.snapsync.nexus.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.snapsync.nexus.exception.*;
+import com.snapsync.nexus.exception.httpclient.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;

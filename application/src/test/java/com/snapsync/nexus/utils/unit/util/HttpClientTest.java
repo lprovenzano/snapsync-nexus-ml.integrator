@@ -3,7 +3,7 @@ package com.snapsync.nexus.utils.unit.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.snapsync.nexus.exception.*;
+import com.snapsync.nexus.exception.httpclient.*;
 import com.snapsync.nexus.utils.HttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
