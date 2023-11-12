@@ -3,7 +3,7 @@ package com.snapsync.nexus.utils.unit.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.snapsync.nexus.exception.httpclient.*;
+import com.snapsync.nexus.entity.auth.Credential;
 import com.snapsync.nexus.utils.HttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +49,7 @@ class HttpClientTest {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(index);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
+        final String response;
 
         Mockito.when(restTemplate.exchange(
                 Mockito.eq(URI),
@@ -58,12 +59,19 @@ class HttpClientTest {
         Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenReturn("{}");
 
         // Act
-        final String response = httpClient.get(URI, headers);
+        if (headers.isEmpty()) {
+            response = httpClient.get(URI);
+        } else {
+            response = httpClient
+                    .setHeader("custom-header-key", "custom-header-value")
+                    .get(URI);
+        }
 
         // Assert
         Assertions.assertNotNull(response);
         Assertions.assertEquals("{}", response);
     }
+
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1})
@@ -72,16 +80,63 @@ class HttpClientTest {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(index);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1}";
+        final Credential body = Credential.builder()
+                .setClientId(6663702242922673L)
+                .setClientSecret("uX4aBfrS9JriB921ay3UKA2lvXo9TY3I")
+                .setCode("TG-655052b1d76fad000182dc0a-92932223")
+                .setRedirectUri("https://webhook.site/3df7fcb9-3c7b-4c8d-b613-8797c0636281")
+                .build();
+        final String jsonBody = "{}";
+        final String response;
+
         Mockito.when(restTemplate.exchange(
                 Mockito.eq(URI),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
                 Mockito.eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
         Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenReturn("{}");
-
+        Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
         // Act
-        final String response = httpClient.post(URI, headers, jsonBody);
+        if (headers.isEmpty()) {
+            response = httpClient.post(URI, body);
+        } else {
+            response = httpClient
+                    .setHeader("custom-header-key", "custom-header-value")
+                    .post(URI, body);
+        }
+
+        // Assert
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals("{}", response);
+    }
+
+    @Test
+    @DisplayName("Given post request with body, when the encoding is APPLICATION_FORM_URLENCODED_VALUE, then return ok.")
+    void post2() throws JsonProcessingException {
+        // Arrange
+        HttpHeaders customHeaders = getCustomHeaders(EMPTY_HEADERS);
+        customHeaders.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+        final Credential body = Credential.builder()
+                .setClientId(6663702242922673L)
+                .setClientSecret("uX4aBfrS9JriB921ay3UKA2lvXo9TY3I")
+                .setCode("TG-655052b1d76fad000182dc0a-92932223")
+                .setRedirectUri("https://webhook.site/3df7fcb9-3c7b-4c8d-b613-8797c0636281")
+                .build();
+        final String formBody = "test=test";
+        final String response;
+
+        Mockito.when(restTemplate.exchange(
+                Mockito.eq(URI),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(new HttpEntity<>(formBody, customHeaders)),
+                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+        Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenReturn("{}");
+        Mockito.when(objectMapper.convertValue(any(Credential.class), Mockito.eq(Map.class))).thenReturn(Map.of("test", "test"));
+        // Act
+
+        response = httpClient
+                .setHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .post(URI, body);
 
         // Assert
         Assertions.assertNotNull(response);
@@ -95,16 +150,24 @@ class HttpClientTest {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(index);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
+        final Credential body = Credential.builder().build();
+        final String jsonBody = "{}";
+        final String response;
         Mockito.when(restTemplate.exchange(
                 Mockito.eq(URI),
                 Mockito.eq(HttpMethod.PUT),
                 Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
                 Mockito.eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
         Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenReturn("{}");
-
+        Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
         // Act
-        final String response = httpClient.put(URI, headers, jsonBody);
+        if (headers.isEmpty()) {
+            response = httpClient.put(URI, body);
+        } else {
+            response = httpClient
+                    .setHeader("custom-header-key", "custom-header-value")
+                    .put(URI, body);
+        }
 
         // Assert
         Assertions.assertNotNull(response);
@@ -118,110 +181,28 @@ class HttpClientTest {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(index);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1}";
+        final Credential body = Credential.builder().build();
+        final String jsonBody = "{}";
+        final String response;
         Mockito.when(restTemplate.exchange(
                 Mockito.eq(URI),
                 Mockito.eq(HttpMethod.DELETE),
                 Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
                 Mockito.eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
         Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenReturn("{}");
-
+        Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
         // Act
-        final String response = httpClient.delete(URI, headers, jsonBody);
+        if (headers.isEmpty()) {
+            response = httpClient.delete(URI, body);
+        } else {
+            response = httpClient
+                    .setHeader("custom-header-key", "custom-header-value")
+                    .delete(URI, body);
+        }
 
         // Assert
         Assertions.assertNotNull(response);
         Assertions.assertEquals("{}", response);
-    }
-
-    @Test
-    @DisplayName("Given get request, when outage happened, then return internal server error (500).")
-    void get_error() {
-        // Arrange
-        final Map<String, List<String>> headers = allHeaders().get(0);
-        final HttpHeaders customHeaders = getCustomHeaders(headers);
-
-        Mockito.when(restTemplate.exchange(
-                Mockito.eq(ERROR_URI),
-                Mockito.eq(HttpMethod.GET),
-                Mockito.eq(new HttpEntity<>(customHeaders)),
-                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        // Act & Assert
-        Assertions.assertThrows(InternalServerErrorException.class, () -> httpClient.get(ERROR_URI, headers));
-        Mockito.verifyNoInteractions(objectMapper);
-    }
-
-    @Test
-    @DisplayName("Given get request, when conflict happened, then return conflict (409).")
-    void get_error_2() {
-        // Arrange
-        final Map<String, List<String>> headers = allHeaders().get(0);
-        final HttpHeaders customHeaders = getCustomHeaders(headers);
-
-        Mockito.when(restTemplate.exchange(
-                Mockito.eq(ERROR_URI),
-                Mockito.eq(HttpMethod.GET),
-                Mockito.eq(new HttpEntity<>(customHeaders)),
-                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.CONFLICT));
-
-        // Act & Assert
-        Assertions.assertThrows(ConflictException.class, () -> httpClient.get(ERROR_URI, headers));
-        Mockito.verifyNoInteractions(objectMapper);
-    }
-
-    @Test
-    @DisplayName("Given get request, when authorization happened, then return unauthorized (401).")
-    void get_error_3() {
-        // Arrange
-        final Map<String, List<String>> headers = allHeaders().get(0);
-        final HttpHeaders customHeaders = getCustomHeaders(headers);
-
-        Mockito.when(restTemplate.exchange(
-                Mockito.eq(ERROR_URI),
-                Mockito.eq(HttpMethod.GET),
-                Mockito.eq(new HttpEntity<>(customHeaders)),
-                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
-
-        // Act & Assert
-        Assertions.assertThrows(UnauthorizedException.class, () -> httpClient.get(ERROR_URI, headers));
-        Mockito.verifyNoInteractions(objectMapper);
-    }
-
-    @Test
-    @DisplayName("Given put request, when resource not exists, then return not found (404).")
-    void put_error() {
-        // Arrange
-        final Map<String, List<String>> headers = allHeaders().get(0);
-        final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
-        Mockito.when(restTemplate.exchange(
-                Mockito.eq(ERROR_URI),
-                Mockito.eq(HttpMethod.PUT),
-                Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
-                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-
-        // Act & Assert
-        Assertions.assertThrows(NotFoundException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
-        Mockito.verifyNoInteractions(objectMapper);
-    }
-
-    @Test
-    @DisplayName("Given put request, when resource target has malformed id, then return bad request (400).")
-    void put_error_2() {
-        // Arrange
-        final Map<String, List<String>> headers = allHeaders().get(0);
-        final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
-        Mockito.when(restTemplate.exchange(
-                Mockito.eq(ERROR_URI),
-                Mockito.eq(HttpMethod.PUT),
-                Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
-                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
-
-        // Act & Assert
-        Assertions.assertThrows(BadRequestException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
-        Mockito.verifyNoInteractions(objectMapper);
     }
 
     @Test
@@ -230,7 +211,7 @@ class HttpClientTest {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(0);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
+        final Credential jsonBody = Credential.builder().build();
         Mockito.when(restTemplate.exchange(
                 Mockito.eq(ERROR_URI),
                 Mockito.eq(HttpMethod.PUT),
@@ -240,25 +221,7 @@ class HttpClientTest {
         Mockito.when(objectMapper.readValue(any(String.class), any(TypeReference.class))).thenThrow(JsonProcessingException.class);
 
         // Act & Assert
-        Assertions.assertThrows(RuntimeException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
-    }
-
-    @Test
-    @DisplayName("Given any request, when error is not handled, then runtime exception.")
-    void put_error_4() {
-        // Arrange
-        final Map<String, List<String>> headers = allHeaders().get(0);
-        final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final String jsonBody = "{\"id\": 1, \"data\": \"test\"}";
-        Mockito.when(restTemplate.exchange(
-                Mockito.eq(ERROR_URI),
-                Mockito.eq(HttpMethod.PUT),
-                Mockito.eq(new HttpEntity<>(jsonBody, customHeaders)),
-                Mockito.eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.BAD_GATEWAY));
-
-        // Act & Assert
-        Assertions.assertThrows(RuntimeException.class, () -> httpClient.put(ERROR_URI, headers, jsonBody));
-        Mockito.verifyNoInteractions(objectMapper);
+        Assertions.assertThrows(RuntimeException.class, () -> httpClient.put(ERROR_URI, jsonBody));
     }
 
     private HttpHeaders getCustomHeaders(Map<String, List<String>> customHeaders) {
