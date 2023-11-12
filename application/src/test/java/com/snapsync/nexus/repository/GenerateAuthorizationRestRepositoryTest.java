@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.HttpClientErrorException;
 
+// TODO: Make unit test, like PingEntrypointTest
 @SpringBootTest
 class GenerateAuthorizationRestRepositoryTest {
     @Autowired

@@ -22,7 +22,6 @@ import java.util.Map;
 public class GenerateAuthorizationRestRepository implements GenerateAuthorizationRepository {
 
     private final HttpClient<AuthorizationDTO> httpClient;
-    private final ObjectMapper mapper;
 
     @Value("${endpoints.base-url-ml}")
     private String urlBase;
@@ -31,10 +30,8 @@ public class GenerateAuthorizationRestRepository implements GenerateAuthorizatio
     private String path;
 
     @Autowired
-    public GenerateAuthorizationRestRepository(HttpClient<AuthorizationDTO> httpClient,
-                                               ObjectMapper mapper) {
+    public GenerateAuthorizationRestRepository(HttpClient<AuthorizationDTO> httpClient) {
         this.httpClient = httpClient;
-        this.mapper = mapper;
     }
 
     @Override
