@@ -78,7 +78,6 @@ class GenerateAuthorizationRestRepositoryTest {
     @DisplayName("Given a credential, when not exists in ML, then bad request exception")
     void test2() {
         //Arrange
-        final String jsonResponse = Json.parse("/generate-authorization/responseOK.json");
         final Credential credential = Credential.builder()
                 .setGrantType(GrantType.AUTHORIZATION_CODE.getName())
                 .setClientId(6663702242922673L)
