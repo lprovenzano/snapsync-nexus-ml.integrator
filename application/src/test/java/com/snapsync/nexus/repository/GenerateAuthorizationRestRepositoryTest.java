@@ -22,8 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ExtendWith(SpringExtension.class)
@@ -63,7 +61,7 @@ class GenerateAuthorizationRestRepositoryTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_FORM_URLENCODED));
         //Act
-        final Authorization response = this.generateAuthorizationRepository.execute(credential);
+        final Authorization response = generateAuthorizationRepository.execute(credential);
 
         //Assert
         Assertions.assertNotNull(response);
@@ -89,7 +87,7 @@ class GenerateAuthorizationRestRepositoryTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withBadRequest());
         //Act
-        Assertions.assertThrows(HttpClientErrorException.BadRequest.class, () -> this.generateAuthorizationRepository.execute(credential));
+        Assertions.assertThrows(HttpClientErrorException.BadRequest.class, () -> generateAuthorizationRepository.execute(credential));
     }
 
     @Test
@@ -107,7 +105,7 @@ class GenerateAuthorizationRestRepositoryTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withUnauthorizedRequest());
         //Act
-        Assertions.assertThrows(HttpClientErrorException.Unauthorized.class, () -> this.generateAuthorizationRepository.execute(credential));
+        Assertions.assertThrows(HttpClientErrorException.Unauthorized.class, () -> generateAuthorizationRepository.execute(credential));
     }
 
 }
