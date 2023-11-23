@@ -8,7 +8,6 @@ import com.snapsync.nexus.utils.HttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.*;
 
@@ -72,60 +72,39 @@ class HttpClientTest {
         Assertions.assertEquals("{}", response);
     }
 
-
     @ParameterizedTest
     @ValueSource(ints = {0, 1})
-    @DisplayName("Given post request with body, when there are no errors, then return ok.")
+    @DisplayName("Given psot request with body, when there are no errors, then return ok.")
     void post(int index) throws JsonProcessingException {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(index);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
         final Credential body = Credential.builder()
-                .setClientId(6663702242922673L)
-                .setClientSecret("uX4aBfrS9JriB921ay3UKA2lvXo9TY3I")
-                .setCode("TG-655052b1d76fad000182dc0a-92932223")
-                .setRedirectUri("https://webhook.site/3df7fcb9-3c7b-4c8d-b613-8797c0636281")
+                .setGrantType(GrantType.AUTHORIZATION_CODE.getName())
                 .build();
         final String jsonBody = "{}";
-
-        Mockito.when(restTemplate.exchange(
-                eq(URI),
-                eq(HttpMethod.POST),
-                eq(new HttpEntity<>(jsonBody, customHeaders)),
-                eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
-        Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
-        // Act
-        final String response = httpClient.post(URI, headers, body);
-
-        // Assert
-        Assertions.assertNotNull(response);
-        Assertions.assertEquals("{}", response);
-    }
-
-    @Test
-    @DisplayName("Given post request with body, when the encoding is APPLICATION_FORM_URLENCODED_VALUE, then return ok.")
-    void post2() {
-        // Arrange
-        HttpHeaders customHeaders = getCustomHeaders(DEFAULT_HEADERS);
-        final Credential body = Credential.builder()
-                .setGrantType(GrantType.AUTHORIZATION_CODE.getName())
-                .setClientId(6663702242922673L)
-                .setClientSecret("uX4aBfrS9JriB921ay3UKA2lvXo9TY3I")
-                .setCode("TG-655052b1d76fad000182dc0a-92932223")
-                .setRedirectUri("https://webhook.site/3df7fcb9-3c7b-4c8d-b613-8797c0636281")
-                .build();
-        final String formBody = "test=test";
+        final String urlEncodedBody = "test=test";
+        final boolean isNotJsonEncoded = Objects.requireNonNull(customHeaders.getContentType()).equalsTypeAndSubtype(MediaType.APPLICATION_FORM_URLENCODED);
         final String response;
-
-        Mockito.when(restTemplate.exchange(
-                eq(URI),
-                eq(HttpMethod.POST),
-                eq(new HttpEntity<>(formBody, customHeaders)),
-                eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
-        Mockito.when(objectMapper.convertValue(any(Credential.class), eq(Map.class))).thenReturn(Map.of("test", "test"));
         // Act
+        if (isNotJsonEncoded) {
+            Mockito.when(restTemplate.exchange(
+                    eq(URI),
+                    eq(HttpMethod.POST),
+                    eq(new HttpEntity<>(urlEncodedBody, customHeaders)),
+                    eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+            Mockito.when(objectMapper.convertValue(eq(urlEncodedBody), eq(Map.class))).thenReturn(Map.of("test", "test"));
+            response = httpClient.post(URI, headers, urlEncodedBody);
 
-        response = httpClient.post(URI, customHeaders, body);
+        } else {
+            Mockito.when(restTemplate.exchange(
+                    eq(URI),
+                    eq(HttpMethod.POST),
+                    eq(new HttpEntity<>(jsonBody, customHeaders)),
+                    eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+            Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
+            response = httpClient.post(URI, headers, body);
+        }
 
         // Assert
         Assertions.assertNotNull(response);
@@ -139,16 +118,32 @@ class HttpClientTest {
         // Arrange
         final Map<String, List<String>> headers = allHeaders().get(index);
         final HttpHeaders customHeaders = getCustomHeaders(headers);
-        final Credential body = Credential.builder().build();
+        final Credential body = Credential.builder()
+                .setGrantType(GrantType.AUTHORIZATION_CODE.getName())
+                .build();
         final String jsonBody = "{}";
-        Mockito.when(restTemplate.exchange(
-                eq(URI),
-                eq(HttpMethod.PUT),
-                eq(new HttpEntity<>(jsonBody, customHeaders)),
-                eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
-        Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
+        final String urlEncodedBody = "test=test";
+        final boolean isNotJsonEncoded = Objects.requireNonNull(customHeaders.getContentType()).equalsTypeAndSubtype(MediaType.APPLICATION_FORM_URLENCODED);
+        final String response;
         // Act
-        final String response = httpClient.put(URI, headers, body);
+        if (isNotJsonEncoded) {
+            Mockito.when(restTemplate.exchange(
+                    eq(URI),
+                    eq(HttpMethod.PUT),
+                    eq(new HttpEntity<>(urlEncodedBody, customHeaders)),
+                    eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+            Mockito.when(objectMapper.convertValue(eq(urlEncodedBody), eq(Map.class))).thenReturn(Map.of("test", "test"));
+            response = httpClient.put(URI, headers, urlEncodedBody);
+
+        } else {
+            Mockito.when(restTemplate.exchange(
+                    eq(URI),
+                    eq(HttpMethod.PUT),
+                    eq(new HttpEntity<>(jsonBody, customHeaders)),
+                    eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+            Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
+            response = httpClient.put(URI, headers, body);
+        }
 
         // Assert
         Assertions.assertNotNull(response);
@@ -166,14 +161,28 @@ class HttpClientTest {
                 .setGrantType(GrantType.AUTHORIZATION_CODE.getName())
                 .build();
         final String jsonBody = "{}";
-        Mockito.when(restTemplate.exchange(
-                eq(URI),
-                eq(HttpMethod.DELETE),
-                eq(new HttpEntity<>(jsonBody, customHeaders)),
-                eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
-        Mockito.when(objectMapper.convertValue(eq(body), anyMap()).thenReturn(jsonBody);
+        final String urlEncodedBody = "test=test";
+        final boolean isNotJsonEncoded = Objects.requireNonNull(customHeaders.getContentType()).equalsTypeAndSubtype(MediaType.APPLICATION_FORM_URLENCODED);
+        final String response;
         // Act
-        final String response = httpClient.delete(URI, headers, body);
+        if (isNotJsonEncoded) {
+            Mockito.when(restTemplate.exchange(
+                    eq(URI),
+                    eq(HttpMethod.DELETE),
+                    eq(new HttpEntity<>(urlEncodedBody, customHeaders)),
+                    eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+            Mockito.when(objectMapper.convertValue(eq(urlEncodedBody), eq(Map.class))).thenReturn(Map.of("test", "test"));
+            response = httpClient.delete(URI, headers, urlEncodedBody);
+
+        } else {
+            Mockito.when(restTemplate.exchange(
+                    eq(URI),
+                    eq(HttpMethod.DELETE),
+                    eq(new HttpEntity<>(jsonBody, customHeaders)),
+                    eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+            Mockito.when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonBody);
+            response = httpClient.delete(URI, headers, body);
+        }
 
         // Assert
         Assertions.assertNotNull(response);

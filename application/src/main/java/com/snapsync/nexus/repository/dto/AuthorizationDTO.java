@@ -5,6 +5,7 @@ import com.snapsync.nexus.exception.validation.ValidationException;
 import com.snapsync.nexus.utils.Util;
 import lombok.*;
 
+
 @Builder(setterPrefix = "set")
 @EqualsAndHashCode(callSuper = true)
 @Getter(AccessLevel.PRIVATE)
@@ -14,7 +15,7 @@ import lombok.*;
 public class AuthorizationDTO extends DomainDTO<Authorization> {
     private String accessToken;
     private String tokenType;
-    private Long expiration;
+    private Long expiresIn;
     private Long userId;
     private String refreshToken;
 
@@ -23,7 +24,7 @@ public class AuthorizationDTO extends DomainDTO<Authorization> {
         return Authorization.builder()
                 .setAccessToken(this.getAccessToken())
                 .setTokenType(this.getTokenType())
-                .setExpiration(this.getExpiration())
+                .setExpiration(Util.dateTimeNow().plusSeconds(this.getExpiresIn()))
                 .setUserId(this.getUserId())
                 .setRefreshToken(this.getRefreshToken())
                 .build();
@@ -37,7 +38,7 @@ public class AuthorizationDTO extends DomainDTO<Authorization> {
         if (Util.isNullOrEmpty(this.getTokenType())) {
             throw new ValidationException("Invalid token type from ML.");
         }
-        if (this.getExpiration() == null) {
+        if (this.getExpiresIn() == null) {
             throw new ValidationException("Invalid expiration token time from ML.");
         }
         if (this.getUserId() == null) {

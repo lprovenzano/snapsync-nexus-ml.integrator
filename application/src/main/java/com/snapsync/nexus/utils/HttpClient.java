@@ -84,7 +84,7 @@ public class HttpClient {
 
     public <T> T jsonToModel(String json, Class<T> type) {
         try {
-            return new ObjectMapper().readValue(json, type);
+            return objectMapper.readValue(json, type);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
