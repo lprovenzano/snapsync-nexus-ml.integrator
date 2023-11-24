@@ -1,12 +1,8 @@
 package com.snapsync.nexus.repository.rest;
 
-import com.snapsync.nexus.entity.auth.Authorization;
-import com.snapsync.nexus.entity.auth.Credential;
-import com.snapsync.nexus.entity.auth.GrantType;
 import com.snapsync.nexus.entity.payments.Payment;
 import com.snapsync.nexus.exception.validation.OrderNotFoundException;
 import com.snapsync.nexus.exception.validation.PayerNotFoundException;
-import com.snapsync.nexus.interfaces.GenerateAuthorizationRepository;
 import com.snapsync.nexus.interfaces.GetPaymentRepository;
 import com.snapsync.nexus.repository.configuration.RestRepositoryTest;
 import com.snapsync.nexus.utils.Util;
