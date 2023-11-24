@@ -1,4 +1,4 @@
-package com.snapsync.nexus.repository.dto;
+package com.snapsync.nexus.repository.rest.dto;
 
 import com.snapsync.nexus.entity.auth.Authorization;
 import com.snapsync.nexus.exception.validation.ValidationException;

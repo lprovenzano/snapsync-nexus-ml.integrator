@@ -1,9 +1,9 @@
-package com.snapsync.nexus.repository;
+package com.snapsync.nexus.repository.rest;
 
 import com.snapsync.nexus.entity.auth.Authorization;
 import com.snapsync.nexus.entity.auth.Credential;
 import com.snapsync.nexus.interfaces.GenerateAuthorizationRepository;
-import com.snapsync.nexus.repository.dto.AuthorizationDTO;
+import com.snapsync.nexus.repository.rest.dto.AuthorizationDTO;
 import com.snapsync.nexus.utils.HttpClient;
 import com.snapsync.nexus.utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +32,11 @@ public class GenerateAuthorizationRestRepository implements GenerateAuthorizatio
 
     @Override
     public Authorization execute(Credential credential) {
-        final String response = httpClient.post(Util.getEndpoint(urlBase, path),
-                Map.of("Content-Type", List.of(MediaType.APPLICATION_FORM_URLENCODED_VALUE)),
-                credential);
-        return httpClient.jsonToModel(response, AuthorizationDTO.class).map();
+        return httpClient.jsonToModel(
+                        httpClient.post(Util.getEndpoint(urlBase, path),
+                                Map.of("Content-Type", List.of(MediaType.APPLICATION_FORM_URLENCODED_VALUE)),
+                                credential),
+                        AuthorizationDTO.class)
+                .map();
     }
 }

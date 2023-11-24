@@ -1,4 +1,4 @@
-package com.snapsync.nexus.repository.dto;
+package com.snapsync.nexus.repository.rest.dto;
 
 public abstract class DomainDTO<T> {
     public T map() {
