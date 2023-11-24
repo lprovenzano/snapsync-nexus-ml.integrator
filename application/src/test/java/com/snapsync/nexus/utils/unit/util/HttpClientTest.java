@@ -8,6 +8,7 @@ import com.snapsync.nexus.utils.HttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,10 +20,7 @@ import org.springframework.http.*;
 import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 
@@ -66,6 +64,25 @@ class HttpClientTest {
 
         // Act
         response = httpClient.get(URI, headers);
+
+        // Assert
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals("{}", response);
+    }
+
+    @Test
+    @DisplayName("Given get request, when there are no errors and no headers, then return ok.")
+    void get2() {
+        // Arrange
+        final String response;
+        Mockito.when(restTemplate.exchange(
+                eq(URI),
+                eq(HttpMethod.GET),
+                eq(new HttpEntity<>(getCustomHeaders(Map.of()))),
+                eq(String.class))).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+
+        // Act
+        response = httpClient.get(URI);
 
         // Assert
         Assertions.assertNotNull(response);

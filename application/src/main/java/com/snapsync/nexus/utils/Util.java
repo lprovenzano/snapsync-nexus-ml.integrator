@@ -16,6 +16,10 @@ public final class Util {
         return value == null || value.isBlank();
     }
 
+    public static boolean isNull(Object value) {
+        return value == null;
+    }
+
     public static LocalDateTime dateTimeNow() {
         return LocalDateTime.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
     }

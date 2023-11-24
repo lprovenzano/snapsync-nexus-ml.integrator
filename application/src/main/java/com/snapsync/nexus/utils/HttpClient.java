@@ -25,6 +25,12 @@ public class HttpClient {
         this.objectMapper = objectMapper;
     }
 
+    public String get(String url) {
+        HttpEntity<String> entity = new HttpEntity<>(buildHeaders(Collections.emptyMap()));
+        final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        return response.getBody();
+    }
+
     public String get(String url, Map<String, List<String>> customHeaders) {
         HttpEntity<String> entity = new HttpEntity<>(buildHeaders(customHeaders));
         final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
