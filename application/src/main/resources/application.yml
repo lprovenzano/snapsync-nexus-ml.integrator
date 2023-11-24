@@ -4,5 +4,9 @@ spring:
     profile: "production"
 
 endpoints:
+  base-url-ml: "https://api.mercadolibre.com"
+  base-url-mp: "https://api.mercadopago.com"
   get:
-    payment: "https://api.mercadopago.com/v1/payments/%d"
+    payment: "/v1/payments/%d"
+  post:
+    oauth-token: "/oauth/token"
