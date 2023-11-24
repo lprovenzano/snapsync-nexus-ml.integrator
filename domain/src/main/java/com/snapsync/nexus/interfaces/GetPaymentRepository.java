@@ -5,5 +5,5 @@ import com.snapsync.nexus.entity.auth.Credential;
 import com.snapsync.nexus.entity.payments.Payment;
 
 public interface GetPaymentRepository {
-    Payment execute(Long id);
+    Payment execute(Long id, String token);
 }

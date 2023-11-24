@@ -40,7 +40,7 @@ class GetPaymentRestRepositoryTest extends RestRepositoryTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
         //Act
-        final Payment response = getPaymentRepository.execute(paymentId);
+        final Payment response = getPaymentRepository.execute(paymentId, "APP_USR-4176082028342621-091820-b4b689e5feb849e0bbb05f5482e24d9b-1484081588");
 
         //Assert
         Assertions.assertNotNull(response);
@@ -62,7 +62,7 @@ class GetPaymentRestRepositoryTest extends RestRepositoryTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
         //Act
-        Assertions.assertThrows(OrderNotFoundException.class, () -> getPaymentRepository.execute(paymentId));
+        Assertions.assertThrows(OrderNotFoundException.class, () -> getPaymentRepository.execute(paymentId, "APP_USR-4176082028342621-091820-b4b689e5feb849e0bbb05f5482e24d9b-1484081588"));
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ class GetPaymentRestRepositoryTest extends RestRepositoryTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
         //Act
-        Assertions.assertThrows(PayerNotFoundException.class, () -> getPaymentRepository.execute(paymentId));
+        Assertions.assertThrows(PayerNotFoundException.class, () -> getPaymentRepository.execute(paymentId, "APP_USR-4176082028342621-091820-b4b689e5feb849e0bbb05f5482e24d9b-1484081588"));
     }
 
 }

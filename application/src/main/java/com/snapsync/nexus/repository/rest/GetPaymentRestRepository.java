@@ -35,7 +35,9 @@ public class GetPaymentRestRepository implements GetPaymentRepository {
 
 
     @Override
-    public Payment execute(Long id) {
-        return httpClient.jsonToModel(httpClient.get(Util.getEndpoint(urlBase, String.format(path, id))), PaymentDTO.class).map();
+    public Payment execute(Long id, String token) {
+        return httpClient.jsonToModel(httpClient.get(Util.getEndpoint(urlBase, String.format(path, id)),
+                        Map.of("Authorization", List.of("Bearer " + token))),
+                PaymentDTO.class).map();
     }
 }
